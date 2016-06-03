@@ -1,0 +1,70 @@
+ ORG    $1000
+START:                  ; first instruction of program
+
+* Put program code here
+
+    MOVE.B #32,D0 ;trap para coger la direccion del hardware
+    MOVE.B  #0,D1 
+    TRAP    #15   ;display la ventana del hardware
+    MOVE.B  #1,D1
+    TRAP    #15   ;coger la direccion del display de los 7 segmentos
+    MOVE.L  D1,A4 ;A4= direccion del display de los 7 segmentos
+    ADD.L   #$E,A4 ; cargamos la direccion del display mas a la derecha
+    MOVE.L  D1,A5
+    ADD.L   #$C,A5  ;cargamos la direccion del segundo display de la derecha
+    
+    MOVE.L  #$00,$E00000  ;apagamos los led de esta direccion del display
+    MOVE.L  #$00,$E00002
+    MOVE.L  #$00,$E00004
+    MOVE.L  #$00,$E00006
+    MOVE.L  #$00,$E00008
+    MOVE.L  #$3F,$E0000A
+    MOVE.B #0,D2  ;ponemos un contador a cero
+    MOVE.B #16,D4 ;ponemos un limite al contador
+
+MOSTRARPORDISPLAY:
+    LEA NUMEROS, A0 ;cargamos la lista numeros a A0
+    ADD.L   D7,A4
+    MOVE.B  (A0,D3),(A4)
+    ADD.B   #1,D3 ;sumamos uno al contador para que recorra la lista
+    add.b   #1,d2 ;sumamos uno al contador
+    MOVE.L  #100,D1 ;emplearemos un segundo para el retardo
+    MOVE.B  #23,D0
+    TRAP    #15
+    CMP     d2,d4 ;comparamos el valor de D2 con el valor de D4
+    BGT.B   MOSTRARPORDISPLAY ;bucle del programa, cuando llegue al tope pasara a la siguiente instruccion
+    
+    CLR D2 ;ponemos el contador D2 a 0
+    CLR D3 ;ponemos el contador D3 a 0
+MOSTRARPORDISPLAY2:
+    LEA NUMEROS, A0 ;cargamos la lista numeros a A0
+     ADD.L   D6,A5
+     MOVE.B  (A0,d5),(A5)
+     ADD.B   #1,D5
+    JMP     MOSTRARPORDISPLAY ;saltara nuevamente a la siguiente instruccion
+    BRA     MOSTRARPORDISPLAY2  ;realizamos el bucle
+    
+    SIMHALT             ; halt simulator
+
+* Put variables and constants here
+
+NUMEROS:
+   dc.b  $3F         ;digito 0
+   dc.b  $06         ;digito 1
+   dc.b  $5B         ;digito 2
+   dc.b  $4F         ;digito 3
+   dc.b  $66         ;digito 4
+   dc.b  $6D         ;digito 5
+   dc.b  $7D         ;digito 6
+   dc.b  $07         ;digito 7
+   dc.b  $7F         ;digito 8
+   dc.b  $6F         ;digito 9
+   dc.b  $77         ;digito A
+   dc.b  $7C         ;digito b
+   dc.b  $39         ;digito C
+   dc.b  $5E         ;digito d
+   dc.b  $79         ;digito E
+   dc.b  $71         ;digito F
+   dc.b  $00         ;digito vacio   
+
+    END    START        ; last line of source
